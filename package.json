@@ -1,0 +1,16 @@
+{
+  "name": "student-assistant-api",
+  "version": "1.0.0",
+  "description": "backend of student assistant ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "javascript",
+    "student",
+    "assistant"
+  ],
+  "author": "Harshit Pandey",
+  "license": "ISC"
+}
