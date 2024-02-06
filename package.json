@@ -2,9 +2,10 @@
   "name": "student-assistant-api",
   "version": "1.0.0",
   "description": "backend of student assistant ",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon src/index.js"
   },
   "keywords": [
     "javascript",
@@ -12,5 +13,8 @@
     "assistant"
   ],
   "author": "Harshit Pandey",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  }
 }
