@@ -3,7 +3,7 @@ import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const productSchema = new Schema(
   {
-    productFile: {
+    pImage: {
       type: String, //cloudinary url
       required: true,
     },
@@ -31,4 +31,4 @@ const productSchema = new Schema(
 
 productSchema.plugin(mongooseAggregatePaginate);
 
-export const User = mongoose.model("Product", userSchema);
+export const Product = mongoose.model("Product", productSchema);
