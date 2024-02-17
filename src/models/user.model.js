@@ -29,6 +29,9 @@ const userSchema = new Schema(
     refreshToken: {
       type: String,
     },
+    resetToken: {
+      type: String,
+    },
   },
   {
     timestamps: true,
@@ -68,6 +71,18 @@ userSchema.methods.generateRefreshToken = function () {
     process.env.REFRESH_TOKEN_SECRET,
     {
       expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
+    }
+  );
+};
+
+userSchema.methods.generateResetToken = function () {
+  return jwt.sign(
+    {
+      _id: this._id,
+    },
+    process.env.RESET_TOKEN_SECRET,
+    {
+      expiresIn: 900,
     }
   );
 };

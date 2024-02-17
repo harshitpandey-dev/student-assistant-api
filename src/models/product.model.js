@@ -15,6 +15,10 @@ const productSchema = new Schema(
       type: String,
       required: [true, "Explain details of the product"],
     },
+    price: {
+      type: String,
+      required: true,
+    },
     isPublished: {
       type: Boolean,
       default: true,

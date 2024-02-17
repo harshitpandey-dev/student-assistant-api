@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
+import { sendEmail } from "../utils/email/sendEmail.js";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -205,6 +206,87 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, req.user, "current user fetched successfully"));
 });
 
+const requestPasswordReset = async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) throw new ApiError(400, "Email does not exist");
+
+  const resetToken = await user.generateResetToken();
+
+  if (!resetToken) {
+    throw new ApiError(500, "Internal Error while generating Reset Token");
+  }
+
+  user.resetToken = resetToken;
+  await user.save();
+
+  const link = `localhost:8000/api/v1/users/passwordReset?token=${resetToken}&email=${email}`;
+
+  const result = await sendEmail(
+    user.email,
+    "Password Reset Request",
+    {
+      name: user.fullname,
+      link: link,
+    },
+    "./template/requestResetPassword.handlebars"
+  );
+
+  if (!result.success) {
+    console.log("Email sending failed:", result.error);
+  }
+  return res
+    .status(201)
+    .json(
+      new ApiResponse(
+        200,
+        { link },
+        "Password change request send successfully"
+      )
+    );
+};
+
+const resetPassword = async (req, res) => {
+  //const {Id, token, password} = req.body
+  //send data as params not as request body
+  const { email, token, password } = req.query;
+
+  const newuser = await User.findOne({ email });
+  let passwordResetToken = newuser.resetToken;
+
+  if (!passwordResetToken) {
+    throw new ApiError(400, "Invalid or expired password reset token");
+  }
+
+  const isValid = token === passwordResetToken;
+
+  if (!isValid) {
+    throw new ApiError(400, "Invalid or expired password reset token");
+  }
+
+  //updating password in database
+  newuser.password = password;
+  await newuser.save({ validateBeforeSave: false });
+
+  const user = await User.findById({ _id: newuser._id });
+
+  await sendEmail(
+    newuser.email,
+    "Password Reset Successfully",
+    {
+      name: newuser.name,
+    },
+    "./template/resetPassword.handlebars"
+  );
+
+  user.resetToken = undefined;
+  await user.save();
+
+  return res
+    .status(201)
+    .json(new ApiResponse(200, user, "passwordResetSuccessfully"));
+};
+
 export {
   registerUser,
   loginUser,
@@ -212,4 +294,6 @@ export {
   refreshAccessToken,
   changeCurrentPassword,
   getCurrentUser,
+  resetPassword,
+  requestPasswordReset,
 };

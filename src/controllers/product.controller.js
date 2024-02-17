@@ -5,10 +5,14 @@ import { Product } from "../models/product.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const addProduct = asyncHandler(async (req, res) => {
-  const { title, description } = req.body;
+  const { title, description, price } = req.body;
 
   if (!title || !description) {
     throw new ApiError(400, "title and description is required");
+  }
+
+  if (!price) {
+    throw new ApiError(400, "price is required");
   }
 
   let productFilePath = req.files?.pImage[0]?.path;
@@ -23,6 +27,7 @@ const addProduct = asyncHandler(async (req, res) => {
     title,
     description,
     pImage: productimage.url,
+    price,
   });
 
   const createdProduct = await Product.findById(product._id).select(
@@ -36,6 +41,16 @@ const addProduct = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, createdProduct, "product Added Successfully"));
+});
+
+const getProductData = asyncHandler(async (req, res) => {
+  const getProducts = await Product.find(
+    {},
+    {
+      _id: 1,
+      title: 1,
+    }
+  );
 });
 
 export { addProduct };
