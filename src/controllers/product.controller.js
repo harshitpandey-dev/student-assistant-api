@@ -1,6 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { User } from "../models/user.model.js";
 import { Product } from "../models/product.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
@@ -15,7 +16,7 @@ const addProduct = asyncHandler(async (req, res) => {
     throw new ApiError(400, "price is required");
   }
 
-  let productFilePath = req.files?.pImage[0]?.path;
+  let productFilePath = req.files?.pImage?.[0]?.path;
 
   const productimage = await uploadOnCloudinary(productFilePath);
 
@@ -28,6 +29,7 @@ const addProduct = asyncHandler(async (req, res) => {
     description,
     pImage: productimage.url,
     price,
+    owner: req.user._id,
   });
 
   const createdProduct = await Product.findById(product._id).select(
@@ -43,14 +45,53 @@ const addProduct = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, createdProduct, "product Added Successfully"));
 });
 
-const getProductData = asyncHandler(async (req, res) => {
-  const getProducts = await Product.find(
-    {},
-    {
-      _id: 1,
-      title: 1,
+const getUserProduct = asyncHandler(async (req, res) => {
+  try {
+    const userProducts = await Product.find({ owner: req.user._id }).populate(
+      "owner",
+      "username"
+    );
+
+    if (userProducts === "") {
+      throw new ApiError(400, `No product is listed by ${req.user.fullname} `);
     }
-  );
+
+    return res
+      .status(201)
+      .json(
+        new ApiResponse(
+          200,
+          { userProducts },
+          `Products listed by ${req.user.fullname} fetched successfully`
+        )
+      );
+  } catch (error) {
+    console.error(error);
+    throw new ApiError(
+      500,
+      "Internal Server Error while fetching user product"
+    );
+  }
 });
 
-export { addProduct };
+const getAllProducts = asyncHandler(async (req, res) => {
+  try {
+    const products = await Product.find({ isPublished: true }).populate(
+      "owner",
+      "username"
+    );
+
+    if (products === "") {
+      throw new ApiError(400, "No product exits");
+    }
+
+    return res
+      .status(201)
+      .json(new ApiResponse(200, { products }, "product fetched successfully"));
+  } catch (error) {
+    console.error(error);
+    return ApiError(400, "Error while fetching products");
+  }
+});
+
+export { addProduct, getAllProducts, getUserProduct };

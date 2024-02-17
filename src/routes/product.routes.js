@@ -1,10 +1,16 @@
 import { Router } from "express";
-import { addProduct } from "../controllers/product.controller.js";
+import {
+  addProduct,
+  getAllProducts,
+  getUserProduct,
+} from "../controllers/product.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
 router.route("/add-Product").post(
+  verifyJWT,
   upload.fields([
     {
       name: "pImage",
@@ -13,5 +19,9 @@ router.route("/add-Product").post(
   ]),
   addProduct
 );
+
+router.route("/getAllProduct").get(verifyJWT, getAllProducts);
+
+router.route("/getUserProduct").get(verifyJWT, getUserProduct);
 
 export default router;
