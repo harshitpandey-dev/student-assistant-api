@@ -3,6 +3,7 @@ import {
   addProduct,
   getAllProducts,
   getUserProduct,
+  editProduct,
 } from "../controllers/product.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -10,7 +11,7 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 const router = Router();
 
 router.route("/add-Product").post(
-  verifyJWT,
+  //verifyJWT,
   upload.fields([
     {
       name: "pImage",
@@ -21,7 +22,7 @@ router.route("/add-Product").post(
 );
 
 router.route("/getAllProduct").get(verifyJWT, getAllProducts);
-
+router.route("/editProduct").post(verifyJWT, editProduct);
 router.route("/getUserProduct").get(verifyJWT, getUserProduct);
 
 export default router;

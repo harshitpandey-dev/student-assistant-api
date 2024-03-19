@@ -1,14 +1,13 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { User } from "../models/user.model.js";
 import { Product } from "../models/product.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const addProduct = asyncHandler(async (req, res) => {
-  const { title, description, price } = req.body;
+  const { name, title, description, price } = req.body;
 
-  if (!title || !description) {
+  if (!title || !description || !name) {
     throw new ApiError(400, "title and description is required");
   }
 
@@ -29,7 +28,8 @@ const addProduct = asyncHandler(async (req, res) => {
     description,
     pImage: productimage.url,
     price,
-    owner: req.user._id,
+    name,
+    // owner: req.user._id,
   });
 
   const createdProduct = await Product.findById(product._id).select(
@@ -41,7 +41,7 @@ const addProduct = asyncHandler(async (req, res) => {
   }
 
   return res
-    .status(200)
+    .status(201)
     .json(new ApiResponse(200, createdProduct, "product Added Successfully"));
 });
 
@@ -94,4 +94,36 @@ const getAllProducts = asyncHandler(async (req, res) => {
   }
 });
 
-export { addProduct, getAllProducts, getUserProduct };
+const editProduct = asyncHandler(async (req, res) => {
+  try {
+    const { name, title, description, price } = req.body;
+
+    if (!name) {
+      throw new ApiError(400, "name is required");
+    }
+
+    if (!title && !description && !price) {
+      throw new ApiError(400, "Atleast 1 parameter should be changed");
+    }
+
+    const product = await Product.findOne({ name });
+    await Product.findByIdAndUpdate(product._id, {
+      title: title,
+      description: description,
+      price: price,
+    });
+
+    const newProduct = await Product.findById(product._id);
+
+    return res
+      .status(201)
+      .json(
+        new ApiResponse(200, { newProduct }, "Product Edited Successfully")
+      );
+  } catch (error) {
+    console.log("error in editProduct", error);
+    throw new ApiError(500, "Internal server error in edit product");
+  }
+});
+
+export { addProduct, getAllProducts, getUserProduct, editProduct };

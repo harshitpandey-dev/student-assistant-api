@@ -7,6 +7,13 @@ const productSchema = new Schema(
       type: String, //cloudinary url
       required: true,
     },
+    name: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+      lowercase: true,
+    },
     title: {
       type: String,
       required: true,

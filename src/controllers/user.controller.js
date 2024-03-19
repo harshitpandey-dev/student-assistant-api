@@ -80,6 +80,10 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Invalid password");
   }
 
+  // if (user.refreshToken) {
+  //   throw new ApiError(400, "Already logged In");
+  // }
+
   const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
     user._id
   );
@@ -220,7 +224,7 @@ const requestPasswordReset = async (req, res) => {
   user.resetToken = resetToken;
   await user.save();
 
-  const link = `localhost:8000/api/v1/users/passwordReset?token=${resetToken}&email=${email}`;
+  const link = `localhost:3000/passwordReset?token=${resetToken}&email=${email}`;
 
   const result = await sendEmail(
     user.email,
@@ -249,7 +253,9 @@ const requestPasswordReset = async (req, res) => {
 const resetPassword = async (req, res) => {
   //const {Id, token, password} = req.body
   //send data as params not as request body
-  const { email, token, password } = req.query;
+  const { email, token, password } = req.body;
+
+  console.log(password);
 
   const newuser = await User.findOne({ email });
   let passwordResetToken = newuser.resetToken;
@@ -287,6 +293,30 @@ const resetPassword = async (req, res) => {
     .json(new ApiResponse(200, user, "passwordResetSuccessfully"));
 };
 
+const editUser = asyncHandler(async (req, res) => {
+  try {
+    const { username, fullname } = req.body;
+
+    if (!username && !fullname) {
+      throw new ApiError(400, "username or fullname is required");
+    }
+    await User.findOneAndUpdate(
+      { email: req.user.email },
+      { $set: { username: username, fullname: fullname } },
+      { new: true }
+    );
+
+    const updatedUser = await User.findById(req.user._id);
+
+    return res
+      .status(201)
+      .json(new ApiResponse(200, { updatedUser }, "user updated successfully"));
+  } catch (error) {
+    console.log("error in editUser", error);
+    return new ApiError(500, "Internal server error in editUser");
+  }
+});
+
 export {
   registerUser,
   loginUser,
@@ -296,4 +326,5 @@ export {
   getCurrentUser,
   resetPassword,
   requestPasswordReset,
+  editUser,
 };
