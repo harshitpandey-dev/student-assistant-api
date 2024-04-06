@@ -15,6 +15,7 @@ const userSchema = new Schema(
       required: true,
       trim: true,
       index: true,
+      unique: true,
     },
     password: {
       type: String,
@@ -25,7 +26,16 @@ const userSchema = new Schema(
       required: true,
       trim: true,
     },
-    refreshToken: {
+    contact: {
+      type: Number,
+      required: true,
+    },
+    isAdmin: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    token: {
       type: String,
     },
     resetToken: {

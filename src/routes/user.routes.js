@@ -3,26 +3,33 @@ import {
   loginUser,
   logoutUser,
   registerUser,
-  refreshAccessToken,
+  // refreshAccessToken,
   changeCurrentPassword,
   requestPasswordReset,
   resetPassword,
   editUser,
+  deleteUser,
+  getUsers,
+  getCurrentUser,
 } from "../controllers/user.controller.js";
-import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { verifyJWT, admin } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
-router.route("/register").post(registerUser);
+router.route("/").post(registerUser).get(verifyJWT, admin, getUsers);
 router.route("/login").post(loginUser);
 
 //secured routes
 
 router.route("/logout").post(verifyJWT, logoutUser);
-router.route("/refresh-token").post(refreshAccessToken);
+// router.route("/refresh-token").post(refreshAccessToken);
 router.route("/changepassword").post(verifyJWT, changeCurrentPassword);
 router.route("/requestpasswordreset").post(requestPasswordReset);
 router.route("/passwordReset").post(resetPassword);
-router.route("/editUser").put(verifyJWT, editUser);
+router
+  .route("/:id")
+  .put(verifyJWT, editUser)
+  .delete(verifyJWT, deleteUser)
+  .get(verifyJWT, getCurrentUser);
 
 export default router;

@@ -10,19 +10,11 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
-router.route("/add-Product").post(
-  //verifyJWT,
-  upload.fields([
-    {
-      name: "pImage",
-      maxCount: 1,
-    },
-  ]),
-  addProduct
-);
+router
+  .route("/")
+  .post(verifyJWT, upload.array("images", 4), addProduct)
+  .get(getAllProducts);
 
-router.route("/getAllProduct").get(verifyJWT, getAllProducts);
-router.route("/editProduct").post(verifyJWT, editProduct);
-router.route("/getUserProduct").get(verifyJWT, getUserProduct);
+router.route("/:id").put(verifyJWT, editProduct).get(verifyJWT, getUserProduct);
 
 export default router;

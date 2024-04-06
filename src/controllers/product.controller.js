@@ -5,31 +5,40 @@ import { Product } from "../models/product.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const addProduct = asyncHandler(async (req, res) => {
-  const { name, title, description, price } = req.body;
+  const { name, description, price, negotiable } = req.body;
 
-  if (!title || !description || !name) {
-    throw new ApiError(400, "title and description is required");
+  const validatename = name.length;
+  const validatedescription = description.length;
+
+  if (validatename < 3) {
+    res.status(400);
+    throw new Error("Name must be of 3 characters  or more length ");
+  }
+  if (validatedescription < 7) {
+    res.status(400);
+    throw new Error("Description must be of 7 characters  or more length ");
   }
 
-  if (!price) {
-    throw new ApiError(400, "price is required");
-  }
+  const files = req.files;
 
-  let productFilePath = req.files?.pImage?.[0]?.path;
+  const cloudinaryUploadPromises = files.map(async (file) => {
+    const productFilePath = file.path;
+    const productImage = await uploadOnCloudinary(productFilePath);
+    return productImage.url;
+  });
 
-  const productimage = await uploadOnCloudinary(productFilePath);
+  const uploadedImages = await Promise.all(cloudinaryUploadPromises);
 
-  if (!productimage) {
+  if (!uploadedImages) {
     throw new ApiError(400, "product image is required");
   }
 
   const product = await Product.create({
-    title,
     description,
-    pImage: productimage.url,
-    price,
+    images: uploadedImages,
     name,
-    // owner: req.user._id,
+    cost: { price, negotiable },
+    owner: req.user._id,
   });
 
   const createdProduct = await Product.findById(product._id).select(
@@ -96,21 +105,43 @@ const getAllProducts = asyncHandler(async (req, res) => {
 
 const editProduct = asyncHandler(async (req, res) => {
   try {
-    const { name, title, description, price } = req.body;
-
-    if (!name) {
-      throw new ApiError(400, "name is required");
-    }
-
-    if (!title && !description && !price) {
-      throw new ApiError(400, "Atleast 1 parameter should be changed");
-    }
+    const { name, description, price, negotiable } = req.body;
 
     const product = await Product.findOne({ name });
+
+    const validatename = name.length;
+    const validatedescription = description.length;
+
+    if (product.name !== name && validatename < 3) {
+      throw new ApiError(400, "Name must be of 3 characters  or more length ");
+    }
+    if (product.description !== description && validatedescription < 7) {
+      throw new ApiError(
+        400,
+        "Description must be of 7 characters  or more length "
+      );
+    }
+
+    // single image delete and adding more image fuctioanlity should be implemented
+
+    // if (product.images.length === 4) {
+    //   throw new ApiError(400, "More than 4 images are not allowed");
+    // } else {
+    //   const files = req.files;
+
+    //   const cloudinaryUploadPromises = files.map(async (file) => {
+    //     const productFilePath = file.path;
+    //     const productImage = await uploadOnCloudinary(productFilePath);
+    //     return productImage.url;
+    //   });
+
+    //   uploadedImages = await Promise.all(cloudinaryUploadPromises);
+    // }
+
     await Product.findByIdAndUpdate(product._id, {
       title: title,
       description: description,
-      price: price,
+      cost: { price, negotiable },
     });
 
     const newProduct = await Product.findById(product._id);
