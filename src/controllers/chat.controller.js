@@ -222,10 +222,51 @@ const deleteChatMessages = async (chatId) => {
     chat: new mongoose.Types.ObjectId(chatId),
   });
 };
+
+const deleteChat = asyncHandler(async (req, res) => {
+  const { chatId } = req.params;
+
+  // check for chat existence
+  const chat = await Chat.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(chatId),
+      },
+    },
+    ...chatCommonAggregation(),
+  ]);
+
+  const payload = chat[0];
+
+  if (!payload) {
+    throw new ApiError(404, "Chat does not exist");
+  }
+
+  await Chat.findByIdAndDelete(chatId); // delete the chat even if user is not admin because it's a personal chat
+
+  await deleteChatMessages(chatId); // delete all the messages and attachments associated with the chat
+
+  const otherParticipant = payload?.participants?.find(
+    (participant) => participant?._id.toString() !== req.user._id.toString() // get the other participant in chat for socket
+  );
+
+  // emit event to other participant with left chat as a payload
+  emitSocketEvent(
+    req,
+    otherParticipant._id?.toString(),
+    ChatEventEnum.LEAVE_CHAT_EVENT,
+    payload
+  );
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Chat deleted successfully"));
+});
 export {
   getAllChats,
   createOrGetChat,
   searchAvailableUsers,
   deleteChatMessages,
   chatCommonAggregation,
+  deleteChat,
 };
