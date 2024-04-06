@@ -2,7 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Product } from "../models/product.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { uploadOnCloudinary, deleteOnCloudinary } from "../utils/cloudinary.js";
 
 const addProduct = asyncHandler(async (req, res) => {
   const { name, description, price, negotiable } = req.body;
@@ -107,7 +107,7 @@ const editProduct = asyncHandler(async (req, res) => {
   try {
     const { name, description, price, negotiable } = req.body;
 
-    const product = await Product.findOne({ name });
+    const product = await Product.findById(req.params._id);
 
     const validatename = name.length;
     const validatedescription = description.length;
@@ -157,4 +157,49 @@ const editProduct = asyncHandler(async (req, res) => {
   }
 });
 
-export { addProduct, getAllProducts, getUserProduct, editProduct };
+const deleteProduct = asyncHandler(async (req, res) => {
+  try {
+    const product = await Product.findById(req.params._id);
+
+    if (!product) {
+      throw new Error("Product not found");
+    }
+
+    const imageUrls = product.images;
+
+    await Promise.all(
+      imageUrls.map(async (imageUrl) => {
+        deleteOnCloudinary(imageUrl);
+      })
+    );
+
+    await Product.findByIdAndDelete(req.params._id);
+
+    return res
+      .status(201)
+      .json(new ApiResponse(200, {}, "Product Deleted Successfully"));
+  } catch (error) {
+    console.error("Error deleting product:", error.message);
+  }
+});
+
+const getProductById = asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id);
+
+  if (!product) {
+    throw new ApiError(500, "No Product Found");
+  }
+
+  return res
+    .status(201)
+    .json(new ApiResponse(200, product, "product found Succesfully"));
+});
+
+export {
+  addProduct,
+  getAllProducts,
+  getUserProduct,
+  editProduct,
+  deleteProduct,
+  getProductById,
+};
