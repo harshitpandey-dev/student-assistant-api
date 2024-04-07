@@ -21,6 +21,10 @@ const addProduct = asyncHandler(async (req, res) => {
 
   const files = req.files;
 
+  if (files.length === 0) {
+    throw new ApiError(400, "Images are required to register a product");
+  }
+
   const cloudinaryUploadPromises = files.map(async (file) => {
     const productFilePath = file.path;
     const productImage = await uploadOnCloudinary(productFilePath);
@@ -107,7 +111,7 @@ const editProduct = asyncHandler(async (req, res) => {
   try {
     const { name, description, price, negotiable } = req.body;
 
-    const product = await Product.findById(req.params._id);
+    const product = await Product.findById(req.params.id);
 
     const validatename = name.length;
     const validatedescription = description.length;
@@ -159,7 +163,7 @@ const editProduct = asyncHandler(async (req, res) => {
 
 const deleteProduct = asyncHandler(async (req, res) => {
   try {
-    const product = await Product.findById(req.params._id);
+    const product = await Product.findById(req.params.id);
 
     if (!product) {
       throw new Error("Product not found");
@@ -173,7 +177,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
       })
     );
 
-    await Product.findByIdAndDelete(req.params._id);
+    await Product.findByIdAndDelete(req.params.id);
 
     return res
       .status(201)

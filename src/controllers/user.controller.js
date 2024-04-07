@@ -290,7 +290,7 @@ const editUser = asyncHandler(async (req, res) => {
       { new: true }
     );
 
-    const updatedUser = await User.findById(req.params._id);
+    const updatedUser = await User.findById(req.params.id);
 
     return res
       .status(201)
@@ -302,7 +302,7 @@ const editUser = asyncHandler(async (req, res) => {
 });
 
 const deleteUser = asyncHandler(async (req, res) => {
-  await User.findByIdAndDelete(req.params._id);
+  await User.findByIdAndDelete(req.params.id);
 
   res
     .status(200)
