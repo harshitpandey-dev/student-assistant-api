@@ -6,6 +6,8 @@ import { createServer } from "http";
 import { initializeSocketIO } from "./socket/index.js";
 import userRouter from "./routes/user.routes.js";
 import productRouter from "./routes/product.routes.js";
+import chatRouter from "./routes/chat.routes.js";
+import messageRouter from "./routes/message.routes.js";
 
 const app = express();
 
@@ -39,5 +41,7 @@ app.use(cookieParser());
 //routes declaration
 app.use("/api/users", userRouter);
 app.use("/api/products", productRouter);
+app.use("/api/chat", chatRouter);
+app.use("/api/message", messageRouter);
 
 export { app };
