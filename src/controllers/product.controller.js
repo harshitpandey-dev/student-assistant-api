@@ -188,7 +188,10 @@ const deleteProduct = asyncHandler(async (req, res) => {
 });
 
 const getProductById = asyncHandler(async (req, res) => {
-  const product = await Product.findById(req.params.id);
+  const product = await Product.findById(req.params.id).populate(
+    "owner",
+    "username"
+  );
 
   if (!product) {
     throw new ApiError(500, "No Product Found");
