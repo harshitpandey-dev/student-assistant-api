@@ -30,6 +30,12 @@ const userSchema = new Schema(
       type: Number,
       required: true,
     },
+    wishlist: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
     isAdmin: {
       type: Boolean,
       required: true,

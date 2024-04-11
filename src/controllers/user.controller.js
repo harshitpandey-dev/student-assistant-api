@@ -4,6 +4,7 @@ import { User } from "../models/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 // import jwt from "jsonwebtoken";
 import { sendEmail } from "../utils/email/sendEmail.js";
+import { Product } from "../models/product.model.js";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -316,11 +317,90 @@ const getUsers = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, users, "User Fetched Successfully"));
 });
 
+const addDeleteToWishlist = asyncHandler(async (req, res) => {
+  const { productid } = req.body;
+  const userid = req.user._id;
+
+  const product = await Product.findById(productid);
+
+  if (!product) {
+    throw new ApiError(400, "Product not found");
+  }
+
+  const user = await User.findById(userid);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const alreadyAdded = user.wishlist.some(
+    (id) => id.toString() === productid.toString()
+  );
+
+  if (alreadyAdded) {
+    const updatedUser = await User.findByIdAndUpdate(
+      userid,
+      { $pull: { wishlist: productid } },
+      { new: true }
+    );
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, updatedUser, "Product removed from wishlist"));
+  } else {
+    const updatedUser = await User.findByIdAndUpdate(
+      userid,
+      { $addToSet: { wishlist: productid } },
+      { new: true }
+    );
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, updatedUser, "Product added to wishlist"));
+  }
+});
+
+const getWishlist = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    throw new ApiError(404, null, "User not found");
+  }
+
+  const productIds = user.wishlist;
+
+  if (productIds.length === 0) {
+    return res
+      .status(200)
+      .json(new ApiResponse(200, {}, "Wishlist Products Fetched"));
+  }
+
+  const productPromises = productIds.map(async (id) => {
+    try {
+      const product = await Product.findById(id);
+      return product;
+    } catch (error) {
+      console.error(`Error fetching product with ID ${id}:`, error);
+      return null;
+    }
+  });
+
+  const products = await Promise.all(productPromises);
+
+  const validProducts = products.filter((product) => product !== null);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, validProducts, "Wishlist Products Fetched"));
+});
+
 export {
   registerUser,
   loginUser,
   logoutUser,
   // refreshAccessToken,
+  getWishlist,
+  addDeleteToWishlist,
   changeCurrentPassword,
   getCurrentUser,
   resetPassword,

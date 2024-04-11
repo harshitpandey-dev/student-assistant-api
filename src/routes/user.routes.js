@@ -11,6 +11,8 @@ import {
   deleteUser,
   getUsers,
   getCurrentUser,
+  addDeleteToWishlist,
+  getWishlist,
 } from "../controllers/user.controller.js";
 import { verifyJWT, admin } from "../middlewares/auth.middleware.js";
 
@@ -31,5 +33,10 @@ router
   .put(verifyJWT, editUser)
   .delete(verifyJWT, deleteUser)
   .get(verifyJWT, getCurrentUser);
+
+router
+  .route("/wishlist")
+  .post(verifyJWT, addDeleteToWishlist)
+  .get(verifyJWT, getWishlist);
 
 export default router;

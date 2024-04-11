@@ -1,11 +1,13 @@
-import { Chat } from "../models/chat.model";
+import { Chat } from "../models/chat.model.js";
 import { User } from "../models/user.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { removeLocalFile } from "../utils/helper.js";
-import { ChatMessage } from "../models/message.model";
+import { ChatMessage } from "../models/message.model.js";
 import { ChatEventEnum } from "../constants.js";
+import { mongoose } from "mongoose";
+import { emitSocketEvent } from "../socket/index.js";
 
 const chatCommonAggregation = () => {
   return [

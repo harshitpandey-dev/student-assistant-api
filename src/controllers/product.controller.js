@@ -143,7 +143,7 @@ const editProduct = asyncHandler(async (req, res) => {
     // }
 
     await Product.findByIdAndUpdate(product._id, {
-      title: title,
+      name: name,
       description: description,
       cost: { price, negotiable },
     });
