@@ -6,7 +6,7 @@ export const getLocalPath = (fileName) => {
 };
 
 export const getStaticFilePath = (req, fileName) => {
-  return `${req.protocol}://${req.get("host")}/images/${fileName}`;
+  return `${req.protocol}://${req.get("host")}/temp/${fileName}`;
 };
 
 export const removeLocalFile = (localPath) => {

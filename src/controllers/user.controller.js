@@ -209,7 +209,7 @@ const requestPasswordReset = async (req, res) => {
   user.resetToken = resetToken;
   await user.save();
 
-  const link = `localhost:3000/passwordReset?token=${resetToken}&email=${email}`;
+  const link = `localhost:5173/passwordReset?token=${resetToken}&email=${email}`;
 
   const result = await sendEmail(
     user.email,

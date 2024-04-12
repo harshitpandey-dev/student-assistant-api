@@ -62,7 +62,7 @@ const getAllMessages = asyncHandler(async (req, res) => {
     ...chatMessageCommonAggregation(),
     {
       $sort: {
-        createdAt: -1,
+        createdAt: 1,
       },
     },
   ]);
