@@ -246,13 +246,13 @@ const resetPassword = async (req, res) => {
   let passwordResetToken = newuser.resetToken;
 
   if (!passwordResetToken) {
-    throw new ApiError(400, "Invalid or expired password reset token");
+    return res.status(401).json(new ApiResponse(400, {}, "Session expired"));
   }
 
   const isValid = token === passwordResetToken;
 
   if (!isValid) {
-    throw new ApiError(400, "Invalid or expired password reset token");
+    return res.status(401).json(new ApiResponse(400, {}, "Session not Valid "));
   }
 
   //updating password in database
