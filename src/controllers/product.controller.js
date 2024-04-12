@@ -109,7 +109,7 @@ const getAllProducts = asyncHandler(async (req, res) => {
 
 const editProduct = asyncHandler(async (req, res) => {
   try {
-    const { name, description, price, negotiable } = req.body;
+    const { name, description, price, negotiable, images } = req.body;
 
     const product = await Product.findById(req.params.id);
 
@@ -146,6 +146,7 @@ const editProduct = asyncHandler(async (req, res) => {
       name: name,
       description: description,
       cost: { price, negotiable },
+      images,
     });
 
     const newProduct = await Product.findById(product._id);

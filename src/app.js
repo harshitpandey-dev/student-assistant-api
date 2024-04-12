@@ -44,4 +44,6 @@ app.use("/api/products", productRouter);
 app.use("/api/chat", chatRouter);
 app.use("/api/message", messageRouter);
 
-export { app };
+app.use("/images", express.static("temp"));
+
+export { app, httpServer };
