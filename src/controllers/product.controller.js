@@ -164,7 +164,7 @@ const editProduct = asyncHandler(async (req, res) => {
 
 const deleteProduct = asyncHandler(async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id || req.body);
 
     if (!product) {
       throw new Error("Product not found");
@@ -209,7 +209,7 @@ const deleteUserProduct = asyncHandler(async (req, res) => {
 
     await Promise.all(
       userProducts.map(async (product) => {
-        await Product.findByIdAndDelete(product._id);
+        deleteProduct(product._id);
       })
     );
 
