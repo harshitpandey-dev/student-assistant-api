@@ -227,6 +227,61 @@ const deleteUserProduct = asyncHandler(async (req, res) => {
   }
 });
 
+const deleteProductImage = asyncHandler(async (req, res) => {
+  const image = req.body;
+  const productId = req.params.id;
+
+  deleteOnCloudinary(image);
+
+  const updatedProduct = await Product.findByIdAndUpdate(
+    productId,
+    { $pull: { images: image } },
+    { new: true }
+  );
+
+  res
+    .status(200)
+    .json(
+      new ApiResponse(200, { updatedProduct }, "Image Deleted successfully")
+    );
+});
+
+const AddProductImage = asyncHandler(async (req, res) => {
+  const files = req.files;
+  const productId = req.params.id;
+
+  if (files.length === 0) {
+    throw new ApiError(400, "Images are required to add to a product");
+  }
+
+  try {
+    const cloudinaryUploadPromises = files.map(async (file) => {
+      const productFilePath = file.path;
+      const productImage = await uploadOnCloudinary(productFilePath);
+      return productImage.url;
+    });
+
+    const uploadedImages = await Promise.all(cloudinaryUploadPromises);
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      productId,
+      { $push: { images: { $each: uploadedImages } } },
+      { new: true }
+    );
+
+    res
+      .status(200)
+      .json(new ApiResponse(200, updatedProduct, "Image added succesfully"));
+  } catch (error) {
+    console.error("Error adding product image:", error);
+    res
+      .status(500)
+      .json(
+        new ApiResponse(500, {}, "Internal Server Error on AddProductImage")
+      );
+  }
+});
+
 export {
   addProduct,
   getAllProducts,
@@ -235,4 +290,6 @@ export {
   deleteProduct,
   getProductById,
   deleteUserProduct,
+  deleteProductImage,
+  AddProductImage,
 };
