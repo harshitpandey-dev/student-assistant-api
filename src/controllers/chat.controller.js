@@ -204,7 +204,7 @@ const deleteChatMessages = async (chatId) => {
 };
 
 const deleteChat = asyncHandler(async (req, res) => {
-  const { chatId } = req.params;
+  const { chatId } = req.params || req.body;
 
   // check for chat existence
   const chat = await Chat.aggregate([
@@ -251,7 +251,7 @@ const deleteUserChat = asyncHandler(async (req, res) => {
 
     await Promise.all(
       chats.map(async (chat) => {
-        await Chat.findByIdAndDelete(chat._id);
+        deleteChat(chat._id);
       })
     );
 
