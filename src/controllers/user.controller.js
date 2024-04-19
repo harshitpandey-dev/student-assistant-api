@@ -5,6 +5,8 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 // import jwt from "jsonwebtoken";
 import { sendEmail } from "../utils/email/sendEmail.js";
 import { Product } from "../models/product.model.js";
+import { deleteUserProduct } from "./product.controller.js";
+import { deleteUserChat } from "./chat.controller.js";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -303,7 +305,10 @@ const editUser = asyncHandler(async (req, res) => {
 });
 
 const deleteUser = asyncHandler(async (req, res) => {
-  await User.findByIdAndDelete(req.params.id);
+  const id = req.params.id;
+  deleteUserProduct(id);
+  deleteUserChat(id);
+  await User.findByIdAndDelete(id);
 
   res
     .status(200)

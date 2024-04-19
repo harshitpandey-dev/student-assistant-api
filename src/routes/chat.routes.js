@@ -2,7 +2,6 @@ import { Router } from "express";
 import {
   getAllChats,
   createOrGetChat,
-  searchAvailableUsers,
   deleteChat,
 } from "../controllers/chat.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -14,8 +13,6 @@ const router = Router();
 router.use(verifyJWT);
 
 router.route("/").get(getAllChats);
-
-router.route("/users").get(searchAvailableUsers);
 
 router
   .route("/c/:receiverId")

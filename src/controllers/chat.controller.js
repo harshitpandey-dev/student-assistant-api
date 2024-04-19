@@ -177,28 +177,6 @@ const createOrGetChat = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, payload, "Chat retrieved successfully"));
 });
 
-const searchAvailableUsers = asyncHandler(async (req, res) => {
-  const users = await User.aggregate([
-    {
-      $match: {
-        _id: {
-          $ne: req.user._id, // avoid logged in user
-        },
-      },
-    },
-    {
-      $project: {
-        username: 1,
-        email: 1,
-      },
-    },
-  ]);
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, users, "Users fetched successfully"));
-});
-
 const deleteChatMessages = async (chatId) => {
   // fetch the messages associated with the chat to remove
   const messages = await ChatMessage.find({
@@ -264,11 +242,35 @@ const deleteChat = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, {}, "Chat deleted successfully"));
 });
+
+const deleteUserChat = asyncHandler(async (req, res) => {
+  try {
+    const userId = req.body.id;
+
+    const chats = await Chat.find({ participants: userId });
+
+    await Promise.all(
+      chats.map(async (chat) => {
+        await Chat.findByIdAndDelete(chat._id);
+      })
+    );
+
+    res
+      .status(200)
+      .json(new ApiResponse(200, {}, "User chats deleted successfully"));
+  } catch (error) {
+    res
+      .status(500)
+      .json(
+        new ApiResponse(500, {}, "Internal server error in deleteUserChat")
+      );
+  }
+});
 export {
   getAllChats,
   createOrGetChat,
-  searchAvailableUsers,
   deleteChatMessages,
   chatCommonAggregation,
   deleteChat,
+  deleteUserChat,
 };

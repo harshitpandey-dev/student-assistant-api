@@ -203,6 +203,30 @@ const getProductById = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, product, "product found Succesfully"));
 });
 
+const deleteUserProduct = asyncHandler(async (req, res) => {
+  try {
+    const userProducts = await Product.find({ owner: req.body });
+
+    await Promise.all(
+      userProducts.map(async (product) => {
+        await Product.findByIdAndDelete(product._id);
+      })
+    );
+
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, {}, "products listed by User deleted successfully")
+      );
+  } catch (error) {
+    res
+      .status(500)
+      .json(
+        new ApiResponse(500, {}, "Internal server error in deleteUserProduct")
+      );
+  }
+});
+
 export {
   addProduct,
   getAllProducts,
@@ -210,4 +234,5 @@ export {
   editProduct,
   deleteProduct,
   getProductById,
+  deleteUserProduct,
 };
