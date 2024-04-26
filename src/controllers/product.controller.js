@@ -90,10 +90,10 @@ const getUserProduct = asyncHandler(async (req, res) => {
 
 const getAllProducts = asyncHandler(async (req, res) => {
   try {
-    const products = await Product.find({ isPublished: true }).populate(
-      "owner",
-      "username"
-    );
+    const products = await Product.find({
+      isPublished: true,
+      sold: false,
+    }).populate("owner", "username");
 
     if (products === "") {
       throw new ApiError(400, "No product exits");
@@ -110,7 +110,8 @@ const getAllProducts = asyncHandler(async (req, res) => {
 
 const editProduct = asyncHandler(async (req, res) => {
   try {
-    const { name, description, keywords, price, negotiable, images } = req.body;
+    const { name, description, keywords, price, sold, negotiable, images } =
+      req.body;
 
     const product = await Product.findById(req.params.id);
 
@@ -127,28 +128,13 @@ const editProduct = asyncHandler(async (req, res) => {
       );
     }
 
-    // single image delete and adding more image fuctioanlity should be implemented
-
-    // if (product.images.length === 4) {
-    //   throw new ApiError(400, "More than 4 images are not allowed");
-    // } else {
-    //   const files = req.files;
-
-    //   const cloudinaryUploadPromises = files.map(async (file) => {
-    //     const productFilePath = file.path;
-    //     const productImage = await uploadOnCloudinary(productFilePath);
-    //     return productImage.url;
-    //   });
-
-    //   uploadedImages = await Promise.all(cloudinaryUploadPromises);
-    // }
-
     await Product.findByIdAndUpdate(product._id, {
       name: name,
       description: description,
       cost: { price, negotiable },
       keywords,
       images,
+      sold,
     });
 
     const newProduct = await Product.findById(product._id);
@@ -207,11 +193,15 @@ const getProductById = asyncHandler(async (req, res) => {
 
 const deleteUserProduct = asyncHandler(async (req, res) => {
   try {
-    const userProducts = await Product.find({ owner: req.body });
+    const userId = req.body;
+    if (!userId) {
+      throw new ApiError(500, "Server Error in deleting user's product");
+    }
+    const userProducts = await Product.find({ owner: userId });
 
     await Promise.all(
       userProducts.map(async (product) => {
-        deleteProduct(product._id);
+        await deleteProduct(product._id);
       })
     );
 
