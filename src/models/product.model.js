@@ -1,27 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
-const reviewSchema = new Schema(
-  {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: "User",
-    },
-    name: {
-      type: String,
-      required: true,
-    },
-    comment: {
-      type: String,
-      required: true,
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
-
 const productSchema = new Schema(
   {
     images: [
@@ -30,7 +9,10 @@ const productSchema = new Schema(
         required: true,
       },
     ],
-    reviews: [reviewSchema],
+    keywords: {
+      type: String,
+      required: true,
+    },
     name: {
       type: String,
       required: true,

@@ -13,12 +13,17 @@ import {
   getCurrentUser,
   addDeleteToWishlist,
   getWishlist,
+  addEditProfileImage,
 } from "../controllers/user.controller.js";
 import { verifyJWT, admin } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
-router.route("/").post(registerUser).get(verifyJWT, admin, getUsers);
+router
+  .route("/")
+  .post(registerUser)
+  .get(verifyJWT, admin, getUsers)
+  .put(verifyJWT, upload.field("profile", 1), addEditProfileImage);
 router.route("/login").post(loginUser);
 
 //secured routes

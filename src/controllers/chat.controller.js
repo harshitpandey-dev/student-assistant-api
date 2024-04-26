@@ -129,6 +129,8 @@ const createOrGetChat = asyncHandler(async (req, res) => {
     ...chatCommonAggregation(),
   ]);
 
+  console.log("chat", chat);
+
   if (chat.length > 0) {
     // if we find the chat that means user already has created a chat
     return res

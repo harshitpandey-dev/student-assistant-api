@@ -5,7 +5,7 @@ import { Product } from "../models/product.model.js";
 import { uploadOnCloudinary, deleteOnCloudinary } from "../utils/cloudinary.js";
 
 const addProduct = asyncHandler(async (req, res) => {
-  const { name, description, price, negotiable } = req.body;
+  const { name, keywords, description, price, negotiable } = req.body;
 
   const validatename = name.length;
   const validatedescription = description.length;
@@ -14,9 +14,9 @@ const addProduct = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Name must be of 3 characters  or more length ");
   }
-  if (validatedescription < 7) {
+  if (validatedescription < 20) {
     res.status(400);
-    throw new Error("Description must be of 7 characters  or more length ");
+    throw new Error("Description must be of 20 characters  or more length ");
   }
 
   const files = req.files;
@@ -40,6 +40,7 @@ const addProduct = asyncHandler(async (req, res) => {
   const product = await Product.create({
     description,
     images: uploadedImages,
+    keywords,
     name,
     cost: { price, negotiable },
     owner: req.user._id,
@@ -109,7 +110,7 @@ const getAllProducts = asyncHandler(async (req, res) => {
 
 const editProduct = asyncHandler(async (req, res) => {
   try {
-    const { name, description, price, negotiable, images } = req.body;
+    const { name, description, keywords, price, negotiable, images } = req.body;
 
     const product = await Product.findById(req.params.id);
 
@@ -146,6 +147,7 @@ const editProduct = asyncHandler(async (req, res) => {
       name: name,
       description: description,
       cost: { price, negotiable },
+      keywords,
       images,
     });
 

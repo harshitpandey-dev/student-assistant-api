@@ -7,6 +7,7 @@ import { sendEmail } from "../utils/email/sendEmail.js";
 import { Product } from "../models/product.model.js";
 import { deleteUserProduct } from "./product.controller.js";
 import { deleteUserChat } from "./chat.controller.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -399,6 +400,31 @@ const getWishlist = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, validProducts, "Wishlist Products Fetched"));
 });
 
+const addEditProfileImage = asyncHandler(async (req, res) => {
+  const file = req.files;
+  const userProfileImage = await uploadOnCloudinary(file.path);
+
+  const user = await user.findById(req.user._id);
+
+  if (user) {
+    user.profile = userProfileImage.url;
+  } else {
+    throw new ApiError(404, "User not found.");
+  }
+
+  const updatedUser = await user.save();
+
+  if (!updatedUser) {
+    throw new ApiError(400, "Error in updating profile image pls retry");
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, updatedUser, "User profile image added successfully")
+    );
+});
+
 export {
   registerUser,
   loginUser,
@@ -413,4 +439,5 @@ export {
   editUser,
   deleteUser,
   getUsers,
+  addEditProfileImage,
 };

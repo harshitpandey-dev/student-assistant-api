@@ -17,6 +17,9 @@ const userSchema = new Schema(
       index: true,
       unique: true,
     },
+    profile: {
+      type: String,
+    },
     password: {
       type: String,
       required: [true, "Password is required"],
