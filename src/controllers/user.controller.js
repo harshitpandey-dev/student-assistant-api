@@ -401,10 +401,10 @@ const getWishlist = asyncHandler(async (req, res) => {
 });
 
 const addEditProfileImage = asyncHandler(async (req, res) => {
-  const file = req.files;
+  const file = req.file;
   const userProfileImage = await uploadOnCloudinary(file.path);
 
-  const user = await user.findById(req.user._id);
+  const user = await User.findById(req.user._id);
 
   if (user) {
     user.profile = userProfileImage.url;
