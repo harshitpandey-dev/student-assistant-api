@@ -51,8 +51,8 @@ const chatCommonAggregation = () => {
                 {
                   $project: {
                     username: 1,
-                    avatar: 1,
-                    email: 1,
+                    profile: 1,
+                    fullname: 1,
                   },
                 },
               ],

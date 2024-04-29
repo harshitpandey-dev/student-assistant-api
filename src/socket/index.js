@@ -25,6 +25,7 @@ const mountJoinChatEvent = (socket) => {
  */
 const mountParticipantTypingEvent = (socket) => {
   socket.on(ChatEventEnum.TYPING_EVENT, (chatId) => {
+    console.log("user is typing", chatId);
     socket.in(chatId).emit(ChatEventEnum.TYPING_EVENT, chatId);
   });
 };
@@ -61,7 +62,7 @@ const initializeSocketIO = (io) => {
         throw new ApiError(401, "Un-authorized handshake. Token is missing");
       }
 
-      const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET); // decode the token
+      const decodedToken = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET); // decode the token
 
       const user = await User.findById(decodedToken?._id).select(
         "-password -refreshToken -emailVerificationToken -emailVerificationExpiry"

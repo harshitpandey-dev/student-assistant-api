@@ -11,22 +11,20 @@ import messageRouter from "./routes/message.routes.js";
 
 const app = express();
 
-app.use(
-  cors({
-    origin: process.env.CORS_ORIGIN,
-    credentials: true,
-  })
-);
-
 const httpServer = createServer(app);
 
 const io = new Server(httpServer, {
   pingTimeout: 60000,
   cors: {
     origin: process.env.CORS_ORIGIN,
-    credentials: true,
   },
 });
+
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN,
+  })
+);
 
 app.set("io", io);
 
