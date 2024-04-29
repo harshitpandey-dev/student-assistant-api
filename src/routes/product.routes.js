@@ -8,6 +8,7 @@ import {
   getProductById,
   AddProductImage,
   deleteProductImage,
+  getUnsoldProducts,
 } from "../controllers/product.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -17,9 +18,11 @@ const router = Router();
 router
   .route("/")
   .post(verifyJWT, upload.array("images", 4), addProduct)
-  .get(getAllProducts);
+  .get(verifyJWT, getAllProducts);
 
 router.route("/product").get(verifyJWT, getUserProduct);
+
+router.route("/unsoldproduct").get(getUnsoldProducts);
 
 router
   .route("/image")

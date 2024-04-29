@@ -92,6 +92,25 @@ const getAllProducts = asyncHandler(async (req, res) => {
   try {
     const products = await Product.find({
       isPublished: true,
+    }).populate("owner", "username");
+
+    if (products === "") {
+      throw new ApiError(400, "No product exits");
+    }
+
+    return res
+      .status(201)
+      .json(new ApiResponse(200, { products }, "product fetched successfully"));
+  } catch (error) {
+    console.error(error);
+    return ApiError(400, "Error while fetching products");
+  }
+});
+
+const getUnsoldProducts = asyncHandler(async (req, res) => {
+  try {
+    const products = await Product.find({
+      isPublished: true,
       sold: false,
     }).populate("owner", "username");
 
@@ -284,4 +303,5 @@ export {
   deleteUserProduct,
   deleteProductImage,
   AddProductImage,
+  getUnsoldProducts,
 };
