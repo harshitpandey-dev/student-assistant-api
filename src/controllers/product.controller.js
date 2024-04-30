@@ -92,7 +92,7 @@ const getAllProducts = asyncHandler(async (req, res) => {
   try {
     const products = await Product.find({
       isPublished: true,
-    }).populate("owner", "username");
+    }).populate("owner", "fullname");
 
     if (products === "") {
       throw new ApiError(400, "No product exits");
